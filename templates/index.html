@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Anime Rankings</title>
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    </head>
+    <body>
+        <section class="section">
+            <div class="container">
+                <nav class="navbar" role="navigation" aria-label="main navigation">
+                        <h1 class="title">Anime Rankings</h1>
+                    <div class="navbar-end">
+                        <form action="/search" method="GET" class="field has-addons">
+                            <div class="control">
+                                <input class="input" type="text" name="query" placeholder="Search">
+                            </div>
+                            <div class="control">
+                                <button class="button is-link" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </nav>
+                <div class="buttons">
+                    <a href="/highest-scored" class="button is-info">10 Highest Scored Anime</a>
+                    <a href="/most-popular" class="button is-info">10 Most Popular Anime</a>
+                    <a href="/movies" class="button is-info">10 Highest Scored Movies</a>
+                    <a href="/tv-shows" class="button is-info">10 Highest Scored TV Shows</a>
+                    <a href="/currently-airing" class="button is-info">10 Highest Scored Currently Airing Anime</a>
+                    <a href="/finished-airing" class="button is-info">10 Highest Scored Finished Anime</a>
+                </div>
+                {% if error %}
+                    <div class="notification is-danger">
+                        <h3>No anime named "{{ error }}"<br>Try the search bar instead</h3>
+                    </div>
+                {% endif %}
+                {% if query %}
+                    {% if results %}
+                        <h2 class="title">Search Results for "{{ query }}"</h2>
+                    {% else %}
+                        <h2 class="title">No Search Results Found for "{{ query }}"</h2>
+                    {% endif %}
+                {% elif request.path == "/most-popular" %}
+                    <h2 class="title">10 Most Popular Anime</h2>
+                {% elif request.path == "/movies" %}
+                    <h2 class="title">10 Highest Scored Movies</h2>
+                {% elif request.path == "/tv-shows" %}
+                    <h2 class="title">10 Highest Scored TV Shows</h2>
+                {% elif request.path == "/currently-airing" %}
+                    <h2 class="title">10 Highest Scored Currently Airing Anime</h2>
+                {% elif request.path == "/finished-airing" %}
+                    <h2 class="title">10 Highest Scored Finished Airing Anime</h2>
+                {% elif "/anime/" in request.path %}
+                {% else %}
+                    <h2 class="title">10 Highest Scored Anime</h2>
+                {% endif %}
+                {% if results %}
+                    <table class="table is-fullwidth is-striped">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>
+                                    <a href="{{ request.path }}?sort_by=Rank&order={{ 'Score DESC, Rank ASC' if order == 'Score ASC, Rank DESC' else 'Score ASC, Rank DESC' }}">
+                                    Rank
+                                    {% if order == "Score DESC, Rank ASC" %}
+                                        ▲
+                                    {% elif order == "Score ASC, Rank DESC" and definedUrl %}
+                                        ▼
+                                    {% endif %}
+                                    </a>
+                                </th>
+                                <th>
+                                    <a href="{{ request.path }}?sort_by=Name&order={{ 'Name' if order == 'Name DESC' else 'Name DESC' }}">
+                                    Name
+                                    {% if order == "Name" %}
+                                        ▲
+                                    {% elif order == "Name DESC" %}
+                                        ▼
+                                    {% endif %}
+                                    </a>
+                                </th>
+                                <th>
+                                    <a href="{{ request.path }}?sort_by=Synopsis&order={{ 'Synopsis' if order == 'Synopsis DESC' else 'Synopsis DESC' }}">
+                                    Synopsis
+                                    {% if order == "Synopsis" %}
+                                        ▲
+                                    {% elif order == "Synopsis DESC" %}
+                                        ▼
+                                    {% endif %}
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('anime_page', anime_name=result['Name']) }}">
+                                        <img src="{{ result['ImageURL'] }}" alt="{{ result['Name'] }} image" onerror="this.onerror=null; this.src=''">
+                                    </a>
+                                </td>
+                                <td><a href="{{ url_for('anime_page', anime_name=result['Name']) }}">{{ result["Rank"] }}</a></td>
+                                <td><a href="{{ url_for('anime_page', anime_name=result['Name']) }}">{{ result["Name"] }}</a></td>
+                                <td><a href="{{ url_for('anime_page', anime_name=result['Name']) }}">{{ result["Synopsis"] }}</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </section>
+    </body>
+</html>
